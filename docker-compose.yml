@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  hardhat-node:
+    build: .
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8545"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nft-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_CONTRACT_ADDRESS=${NEXT_PUBLIC_CONTRACT_ADDRESS}
+    depends_on:
+      hardhat-node:
+        condition: service_healthy
+    networks:
+      - nft-network
+
+networks:
+  nft-network:
+    driver: bridge
